@@ -1,0 +1,562 @@
+
+    <!DOCTYPE html>
+
+    <html>
+
+    <style>
+th, td {
+  border:1px solid black;
+}
+</style>
+
+    <head>
+        <title>Bolts & Clackers</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+         </head>
+    <body> 
+        <script>
+            var NumGess = 0;
+            SltdMdBtn = "None";
+            const greens = new Set();
+            bolts = [0, 0, 0, 0, 0];
+            xarray = [ [0,0,0,0,0,0,0,0,0,0,"\n"],
+                       [0,0,0,0,0,0,1,0,0,0,"\n"],
+                       [0,0,0,0,0,0,2,0,0,0,"\n"],
+                       [0,0,0,0,0,0,3,0,0,0,"\n"],
+                       [0,0,0,0,0,0,4,0,0,0,"\n"],
+                       [0,0,0,0,0,0,5,0,0,0,"\n"],
+                       [0,0,0,0,0,0,6,0,0,0,"\n"],
+                       [0,0,0,0,0,0,7,0,0,0,"\n"],
+                       [0,0,0,0,0,0,8,0,0,0,"\n"],
+                       [0,0,0,0,0,0,9,0,0,0,"\n"]];
+            guesses = [[0,0,0,0,0]];
+            
+            NumIddDgts = 0;  //number of secrete number digits identified
+    
+            ScrtNm = GenUnknwn();
+            //document.getElementById("SN").innerHTML=ScrtNm;
+
+            function AltXArray(){ // alert Xarray by pushing show array button
+                             
+                                  
+                alert(","+xarray.toString());
+                }
+
+            function GenUnknwn(){
+                //alert("Generating Unknown.");
+                UnKn="";
+                I = 0;
+                digit="";
+                while (I < 4){
+                    digit = Math.floor(Math.random() * (9) ) + 1;
+                    if (UnKn.includes(digit)) {
+                        //Do nothing
+                        }
+                    else{
+                        I = I + 1;
+                        UnKn = UnKn + digit;
+                        }
+                    }
+                return UnKn;
+                }
+
+            function SubmitTitle(num){
+                document.getElementById("guess").value=num;
+                SubMitGess();
+                }
+            
+
+
+
+            function SubMitGess(){
+                var x = document.getElementById("guess").value;
+                document.getElementById("guess").value="";
+                if (x.length != 4){
+                    alert("You must submit 4 and only 4 digits.");
+                    }
+                else{
+                    NumGess = NumGess + 1;
+                    xH = CnvGtoHTML(x); //convert text to HTML for table
+                    //alert("Returned: " +xH);
+                    document.getElementById("g"+NumGess).innerHTML=xH;
+                    BCs = FndBC(x);
+                    //alert(BCs);
+                    document.getElementById("b"+NumGess).innerHTML=BCs.charAt(0);
+                    document.getElementById("c"+NumGess).innerHTML=BCs.charAt(1);
+                    think(BCs, x);
+                    if (BCs=="40"){
+                        YouGotIt(NumGess);
+                        }
+                    }
+                checkTable();
+                
+                }
+
+            function CnvGtoHTML(x){ // put guesses in table in manipulatable format 
+                xH= " ";
+                //alert("CnvGtoHTML");
+                for (let I=0; I<4; I++){
+                    vl = x.charAt(I);
+                    xH = xH + '<span class="GD ';
+                    xH = xH + 'D' + (I+1) +' V' + vl +'"';
+                    if (vl == bolts[I+1]){
+                        xH = xH + ' style="Color:Blue"';
+                        }
+                    else if (greens.has(vl)){
+                        xH = xH + ' style="Color:Chartreuse"';
+                        }
+                    xH = xH + '>' + vl + '</span>'; 
+                    }
+
+                //alert(xH);                    
+                return (xH);
+                }
+
+            function FndBC(Gs){
+                //alert("In FndBC function and Gs = " + Gs);
+                B=0;
+                C=0;
+                for (let I=0; I<4; I++){
+                    Rslt = ScrtNm.search(Gs.charAt(I));
+                    //alert("I="+I+" Rslt ="+Rslt);
+                    if (Rslt>-1){
+                        //found either a bolt or clacker
+                       if (Rslt == I){
+                           B++;
+                           //alert("found a bolt.  B now = "+B);
+                           }
+                        else{
+                            //found a clacker
+                            C++;
+                            }
+                        }
+                    }
+                //alert (" " + B + " bolts & " + C + " clackers.");
+
+                return (""+B+C);
+                }
+            
+            function think(BCs, guess){    // places Xs in the X table
+                if (BCs.charAt(0)==0 && BCs.charAt(1)>0){  //clackers and no bolts
+                    for (let I=0; I<4; I++){
+                        digit=I+1;
+                        num=guess.charAt(I);
+                        ClVl=document.getElementById("n"+num+"d"+digit).innerHTML;
+                        if (ClVl!="X"){
+                            document.getElementById("n"+num+"d"+digit).innerHTML="X";
+                            xarray[num][digit]="X";
+                            xarray[0][digit]+= 1;
+                            xarray[num][5]+= 1;
+                            //GreyX(num, "color:Red");
+                            }
+                        }
+                    }
+
+                //bolts but no clackers
+                if (BCs.charAt(0)>0 && BCs.charAt(1)==0){
+                    for (let I=0; I<4; I++){
+                        num=guess.charAt(I);
+                        for (let J=1; J<5; J++){
+                            if (J!=I+1){
+                                ClVl=document.getElementById("n"+num+"d"+J).innerHTML;
+                                if (ClVl!="X"){
+                                    document.getElementById("n"+num+"d"+J).innerHTML="X";
+                                    xarray[num][J]="X";
+                                    xarray[0][J]+= 1;
+                                    xarray[num][5]+= 1;
+
+                                    }
+                                }
+                            }
+                        //GreyX(num);
+                        }
+                    }
+
+                //No bolts or clackers
+                if (BCs.charAt(0)==0 && BCs.charAt(1)==0){
+                    for (let I=0; I<4; I++){
+                        num=guess.charAt(I);
+                        for (let J=1; J<5; J++){
+                            ClVl=document.getElementById("n"+num+"d"+J).innerHTML;
+                            if (ClVl!="X"){
+                                document.getElementById("n"+num+"d"+J).innerHTML="X";
+                                xarray[num][J]="X";
+                                xarray[0][J]+= 1;
+                                xarray[num][5]+= 1;
+                                }
+                            }
+                        }
+                    }
+                
+                }
+
+            function ClrGsDgts(nums, styl){    // nums is a string of digits, styl is style value
+                                               // E.g. "color:green" or "background:yellow"
+                alert("In ClrGsDgts(" + nums + ", "+styl+")");
+                }
+
+
+            function YouGotIt(x){
+                alert("You guessed the correct answer in only "+ x+ " guess. GREAT JOB!");
+                //location.reload();
+                }
+
+            function clickCell(ID){
+                text = "X";
+                textFArray = "X";
+                inc = 1;
+                num = ID.charAt(1);
+                col = ID.charAt(3);
+                cur = document.getElementById(ID).innerHTML;
+                clrTxt = "color:Black"
+                if (cur == "X"){
+                    text=" ";
+                    textFArray = 0;
+                    inc = -1;
+                    }
+                document.getElementById(ID).innerHTML=text;
+                xarray[num][5]=xarray[num][5]+inc;
+                xarray[0][col]+= inc;
+                xarray[num][col]=textFArray;
+                if (xarray[num][5]>3){
+                    clrTxt = "color:LightGrey";
+                    }
+                GreyX("V"+num,clrTxt);
+                }
+
+            function BDGT(){
+                for (let I=1; I<5; I++){
+                    GreyX("D"+I+" V"+bolts[I], "color:Red");
+                    }
+                }
+
+
+
+
+            function GreyX(Clss, DgStyle){
+                //alert("in GreyX.  num = "+num+"  DgStyle = "+DgStyle);
+                const TbDgs= document.getElementsByClassName(Clss);
+                for (let y of TbDgs){
+                    y.style=DgStyle;
+                    }
+                
+                }
+
+            function TblClick(x){
+                window[SltdMdBtn](x);
+                }
+
+            function IdDigit(x){
+                num = x.charAt(1);
+                syle=document.getElementById("n"+num+"d1").style.background;
+                
+
+                if ((NumIddDgts>3) && (syle != "lightgreen")){
+                    text = "You have already selected 4 digits.  You must deselect at least ";
+                    text += "one digit before you may select another.";
+                    alert(text);
+                    }
+                else{
+                    inc = 1;
+                    bgcolor ="background:LightGreen";
+                    GsTblStyle="Color:Chartreuse";
+                    clrForArray="G";
+                    //alert("xarray["+num+"]="+xarray[num]);
+                    
+                    if (xarray[num][5]>3){
+                        alert("Error.  This number has been Xed out.  You cannot select it.");
+                        
+                        }
+                    else{
+                        if (syle=="lightgreen"){
+                            bgcolor="background:White";
+                            GsTblStyle="Color:Black";
+                            inc = -1;
+                            greens.delete(num);
+                            clrForArray=0;
+                            }
+                        else{
+                            greens.add(num);
+                            }
+                        NumIddDgts = NumIddDgts + inc;
+                        
+                        xarray[num][0]=clrForArray;
+                        for (let J=1; J<5; J++){
+                            document.getElementById("n"+num+"d"+J).style=bgcolor;
+                            }
+                        if (NumIddDgts == 4){
+                            XoutNonGreens();
+                            }
+
+                        }
+                    //if (xarray[num][5]==3){
+                        //GsTblStyle="Color:Blue";
+                        //}
+                    GreyX("V"+num, GsTblStyle);
+                    }
+                }
+            function XoutNonGreens(){
+                for (let n=1; n<10; n++){
+                    txt = toString
+                    //alert("Row = " + n + ". In greens = " + greens.has(n.toString()));
+                    if (!(greens.has(n.toString()))){                    
+                        for (let d=1; d<5; d++){
+                            cur = document.getElementById("n"+n+"d"+d);
+
+                            if (cur.innerHTML != "X"){
+                                cur.innerHTML="X";
+                                xarray[n][5]=xarray[num][5]+inc;
+                                xarray[0][d]+= inc;
+                                xarray[n][d]="X";
+                                if (xarray[num][5]>3){
+                                    GreyX("V"+num,"color:LightGrey");
+                                    }                                                    
+                                }
+                            
+                            }
+                        }
+                    }                
+                }
+
+
+            
+            function showGreens(){
+                text ="Number of greens = "+ NumIddDgts+".\n";
+                text = text + "Greens are : ";
+                for (const x of greens.values()){
+                    text = text + x + ", ";
+                    }
+                text = text + "\nBolts = "+ bolts.toString();
+
+                alert(text);
+                }
+
+            function checkTable(){
+                for (let I=1; I<5; I++){
+                    //alert("Column " + I + " has " + xarray[0][I] + " Xs.");
+
+                    if (xarray[0][I]==8){  //reading 0th row to see if there are any columns with 9 Xs
+                        for (let J=1; J<10; J++){ //determine which digit (row) is the bolt
+                            if (xarray[J][I]!="X"){ //identified the number of the bolt.
+                                //bolts[0]++;
+                                if (xarray[J][0] = "0" && xarray[J][0]!="B"){
+                                    IdDigit("n"+J);
+                                    xarray[J][0]= "B";
+                                    }
+                                
+                                for (let K=1; K<5; K++){
+                                    
+                                    if (K != I){
+                                        //alert("Inside K ("+ K +") not equal to I ("+I+") loop.");
+                                        if (xarray[J][K]!="X"){
+                                            
+                                            document.getElementById("n"+J+"d"+K).innerHTML="X";
+                                            xarray[J][K]="X";
+                                            if (xarray[0][K]<8){
+                                                xarray[0][K]++;
+                                                }
+                                            
+                                            else{
+                                                alert("You have X'ed out too many numbers in column "+K);
+                                                }
+                                            }
+                                        }
+                                    else{
+                                        //alert("Inside K ("+ K +") equal to I ("+I+") loop.");
+                                        if (bolts[K]==0){
+                                            bolts[I]=J;
+                                            document.getElementById("n"+J+"d"+K).style="background:DodgerBlue";
+                                            document.getElementById("n"+J+"d"+K).innerHTML=J;
+                                            xarray[J][K]="B";                                       
+                                            }
+                                        }
+                                    }
+                                
+                                
+                                }
+                            }
+
+                        }
+                    }
+                for (let row=1; row<10; row++){
+                    if (xarray[row][0]=="G" && xarray[row][5]==3){
+                        for (let col=1; col<5; col++){
+                            if (xarray[row][col]!="X"){
+                                bolts[col]=row;
+                                document.getElementById("n"+row+"d"+col).style="background:DodgerBlue";
+                                document.getElementById("n"+row+"d"+col).innerHTML=row;
+                                xarray[row][col]="B";
+                                xarray[row][0]="B";
+                                for (let row2=1; row2<10; row2++){
+                                    if (row2!=row && xarray[row2][col]=="0"){
+                                        document.getElementById("n"+row2+"d"+col).innerHTML="X";
+                                        xarray[row2][col]="X";
+                                        xarray[row2][5]++;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+
+                //alert(bolts.toString());
+                document.getElementById("SN").innerHTML=""+bolts[1]+bolts[2]+bolts[3]+bolts[4];
+                BDGT()
+                }
+
+            function screenButton(event){
+                var x = event.key;
+                //alert("In screenButton function == " + x);
+                if (x == "Enter"){
+                    SubMitGess();
+                    }
+                }
+
+
+         </script>
+    
+    <header style="text-align:center;">
+      <h2>Cool Daddy Jack Jack's</h2>
+      
+    <h1>BOLTS & CLACKERS PAGE</h1>
+        </header>   
+    <br>
+
+<div style="text-align:center;">
+<h3>Input your 4 digit guess:</h3>
+<p id="SN" onClick="SubmitTitle(this.innerText)">????</p>
+<input type="number" id="guess" onkeydown="screenButton(event)"></br></br>
+<button type="button" onclick="SubMitGess()">Enter</button>
+</br></br></br>
+
+    <u>Record of guesses and results</u></br></br>
+
+</div>
+
+    <table style="margin-left:auto;
+                margin-right:auto;
+                width:50%;
+                text-align:center">
+   
+    
+    <tr>
+        <td style="border: 0px"> </td>
+        <td>Bolts</td>
+        <td>Clack</td>
+        <td style="border: 0px"> </td>
+        <td id="n1" onclick="IdDigit(this.id)">1</td>
+        <td id="n1d1" onclick="clickCell(this.id)"> </td>
+        <td id="n1d2" onclick="clickCell(this.id)"> </td>
+        <td id="n1d3" onclick="clickCell(this.id)"> </td>
+        <td id="n1d4" onclick="clickCell(this.id)"> </td>
+    </tr>
+    
+    <tr>
+        <td id="g1"> </td>
+        <td id="b1"> </td>
+        <td id="c1"> </td>
+        <td id="u1"> </td>
+        <td id="n2" onclick="IdDigit(this.id)">2</td>
+        <td id="n2d1" onclick="clickCell(this.id)"> </td>
+        <td id="n2d2" onclick="clickCell(this.id)"> </td>
+        <td id="n2d3" onclick="clickCell(this.id)"> </td>
+        <td id="n2d4" onclick="clickCell(this.id)"> </td>
+
+    </tr>
+    <tr>
+        <td id="g2"> </td>
+        <td id="b2"> </td>
+        <td id="c2"> </td>
+        <td id="u2"> </td>
+        <td id="n3" onclick="IdDigit(this.id)">3</td>
+        <td id="n3d1" onclick="clickCell(this.id)"> </td>
+        <td id="n3d2" onclick="clickCell(this.id)"> </td>
+        <td id="n3d3" onclick="clickCell(this.id)"> </td>
+        <td id="n3d4" onclick="clickCell(this.id)"> </td>
+
+    </tr>
+    <tr>
+        <td id="g3"> </td>
+        <td id="b3"> </td>
+        <td id="c3"> </td>
+        <td id="u3"> </td>
+        <td id="n4" onclick="IdDigit(this.id)">4</td>
+        <td id="n4d1" onclick="clickCell(this.id)"> </td>
+        <td id="n4d2" onclick="clickCell(this.id)"> </td>
+        <td id="n4d3" onclick="clickCell(this.id)"> </td>
+        <td id="n4d4" onclick="clickCell(this.id)"> </td>
+
+    </tr>
+    <tr>
+        <td id="g4"> </td>
+        <td id="b4"> </td>
+        <td id="c4"> </td>
+        <td id="u4"> </td>
+        <td id="n5" onclick="IdDigit(this.id)">5</td>
+        <td id="n5d1" onclick="clickCell(this.id)"> </td>
+        <td id="n5d2" onclick="clickCell(this.id)"> </td>
+        <td id="n5d3" onclick="clickCell(this.id)"> </td>
+        <td id="n5d4" onclick="clickCell(this.id)"> </td>
+
+    </tr>
+    <tr>
+        <td id="g5"> </td>
+        <td id="b5"> </td>
+        <td id="c5"> </td>
+        <td id="u5"> </td>
+        <td id="n6" onclick="IdDigit(this.id)">6</td>
+        <td id="n6d1" onclick="clickCell(this.id)"> </td>
+        <td id="n6d2" onclick="clickCell(this.id)"> </td>
+        <td id="n6d3" onclick="clickCell(this.id)"> </td>
+        <td id="n6d4" onclick="clickCell(this.id)"> </td>
+
+    </tr>
+    <tr>
+        <td id="g6"> </td>
+        <td id="b6"> </td>
+        <td id="c6"> </td>
+        <td id="u6"> </td>
+        <td id="n7" onclick="IdDigit(this.id)">7</td>
+        <td id="n7d1" onclick="clickCell(this.id)"> </td>
+        <td id="n7d2" onclick="clickCell(this.id)"> </td>
+        <td id="n7d3" onclick="clickCell(this.id)"> </td>
+        <td id="n7d4" onclick="clickCell(this.id)"> </td>
+
+    </tr>
+    <tr>
+        <td id="g7"> </td>
+        <td id="b7"> </td>
+        <td id="c7"> </td>
+        <td id="u7"> </td>
+        <td id="n8" onclick="IdDigit(this.id)" >8</td>
+        <td id="n8d1" onclick="clickCell(this.id)"> </td>
+        <td id="n8d2" onclick="clickCell(this.id)"> </td>
+        <td id="n8d3" onclick="clickCell(this.id)"> </td>
+        <td id="n8d4" onclick="clickCell(this.id)"> </td>
+
+    </tr>
+    <tr>
+        <td id="g8"> </td>
+        <td id="b8"> </td>
+        <td id="c8"> </td>
+        <td id="u8"> </td>
+        <td id="n9" onclick="IdDigit(this.id)">9</td>
+        <td id="n9d1" onclick="clickCell(this.id)"> </td>
+        <td id="n9d2" onclick="clickCell(this.id)"> </td>
+        <td id="n9d3" onclick="clickCell(this.id)"> </td>
+        <td id="n9d4" onclick="clickCell(this.id)"> </td>
+
+    </tr>
+    </table>
+    <div style="text-align:center;">
+        <u>Click Modes</u></br></br>
+
+    <button id="Show xarray[]" onclick="AltXArray()">Show xarray[]</button>
+    <button id="Show Greens" onclick="showGreens()">Show Greens</button>
+    <button id="SelectBolt" onclick="checkTable()">checkTable</button>
+    <button id="SelectClacker" onclick="ModeSelect(this.id)">Mark as Clacker</button>
+    </div>
+        </body>
+
+    </html>
